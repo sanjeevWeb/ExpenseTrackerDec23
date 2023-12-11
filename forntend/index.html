@@ -4,11 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <style>
+        .form_hidden {
+            display: none;
+        }
+    </style>
 </head>
 <body>
     <h1>Expence Tracker</h1>
     <div>
-        <form id="form">
+        <form id="form" class="form_hidden">
+            <h3>Registration Page</h3>
             <label for="username">Name</label>
             <input type="text" id="username">
             <label for="email">Email</label>
@@ -16,6 +22,18 @@
             <label for="pass">Password</label>
             <input type="password" id="pass">
             <button type="submit">submit</button>
+            <a id="gotoLogin">already registered! login here</a>
+        </form>
+    </div>
+    <div>
+        <form action="" method="post" id="loginForm">
+            <h3>Login Page</h3>
+            <label for="regEmail">Registered Email</label>
+            <input type="email" name="regEmail" id="regEmail">
+            <label for="password"></label>
+            <input type="password" name="password" id="password">
+            <button type="submit">Login</button>
+            <a id="gotoRegister" style="cursor: pointer;">not a registered user? creae account here</a>
         </form>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.2/axios.min.js" integrity="sha512-b94Z6431JyXY14iSXwgzeZurHHRNkLt9d6bAHt7BZT38eqV+GyngIi/tVye4jBKPYQ2lBdRs0glww4fmpuLRwA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
