@@ -1,0 +1,10 @@
+CREATE DATABASE expencetrac;
+USE expencetrac;
+
+CREATE TABLE expenses (
+    id INT UNIQUE AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    pass VARCHAR(255) NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
