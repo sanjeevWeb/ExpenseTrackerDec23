@@ -77,7 +77,61 @@ const LoginFunc = (req, res) => {
     }
 }
 
+const addExpense = (req, res) => {
+    const { amount, description, category } = req.body
+    if (!amount || !description || !category) {
+        return res.json({ error: 'all fields required' })
+    }
+    try {
+        // throwing error if columns are not mentioned
+        const db_query = `INSERT INTO userentry (amount, description, exptype)VALUES (?,?,?)`;
+
+        // if i put an await before pool.query, it suggest me to import promise version of pool.query
+        pool.query(db_query, [amount, description, category], (err, result) => {
+            if(err){
+                console.log(err);
+                return res.json({ message: 'error inserting data'})
+            }
+            console.log(result);
+            // console.log(result.insertId); id: result.insertId
+            return res.json({ message: 'data inserted successfully' });
+        });
+    }
+    catch (error) {
+        console.log(error);
+    }
+
+}
+
+const getAllUserEntry = (req, res) => {
+    const db_query = `SELECT * FROM userentry`;
+    pool.execute(db_query, (err,result) => {
+        if(err){
+            console.log(err);
+            return res.json({ message: 'error in reading database'});
+        }
+        console.log(result);
+        return res.json({ result });
+    })
+}
+
+const deleteDataById = (req,res) => {
+    const id = req.params.id;
+    const db_query = `DELETE FROM userentry WHERE id = ?`;
+    pool.query(db_query,[id], (err,result) => {
+        if(err){
+            console.log(err);
+            return res.json({message: 'error deleteting this entry'})
+        }
+        console.log(result);
+        return res.json({ message: `id: ${id} deleted`});
+    })
+}
+
 module.exports = {
     RegisterFunc,
-    LoginFunc
+    LoginFunc,
+    addExpense,
+    getAllUserEntry,
+    deleteDataById
 }

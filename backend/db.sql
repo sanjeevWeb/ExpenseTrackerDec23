@@ -8,3 +8,13 @@ CREATE TABLE expenses (
     pass VARCHAR(255) NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE userentry (
+    id INT UNIQUE AUTO_INCREMENT,
+    amount INT NOT NULL,
+    description VARCHAR(255) NOT NULL,
+    exptype VARCHAR(255) NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ALTER userentry
