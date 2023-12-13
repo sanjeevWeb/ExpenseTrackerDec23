@@ -45,7 +45,8 @@ form.addEventListener('submit', (e) => {
     .catch(err => console.log(err))
 })
 
-
+//The window.location object can be used to get the current page address (URL) and to redirect
+// the browser to a new page.
 loginForm.addEventListener('submit', (e) => {
     e.preventDefault();
     const email = regEmail.value;
@@ -56,8 +57,11 @@ loginForm.addEventListener('submit', (e) => {
     }
     axios.post('http://localhost:5000/api/login', { email, passKey})
     .then(result => {
-        console.log(result);
+        // console.log(result);
         alert(result.data.message);
+        const token = result.data.token;
+        localStorage.setItem('token', token);
+        window.location.href = 'afterLogin.html';
     })
     .catch(err => console.log(err))
 

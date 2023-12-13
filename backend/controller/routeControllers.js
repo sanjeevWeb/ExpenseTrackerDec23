@@ -1,5 +1,7 @@
 const pool = require("../db/database");
 const bcrypt = require("bcryptjs")
+const jwt = require("jsonwebtoken")
+
 
 const RegisterFunc = async (req, res) => {
     const { username, email, pass } = req.body;
@@ -59,8 +61,12 @@ const LoginFunc = (req, res) => {
             }
             if (result[0].email === email) {
                 const isMatched = await bcrypt.compare(passKey, result[0].pass);
+
                 if (isMatched) {
-                    return res.json({ message: 'log in successfull' })
+                    const token = jwt.sign(result[0].id, 'hfjsfjskksq');
+                    console.log(token);
+
+                    return res.json({ message: 'log in successfull', token })
                 }
                 else {
                     return res.json({ message: 'user not authorized' })
@@ -83,11 +89,14 @@ const addExpense = (req, res) => {
         return res.json({ error: 'all fields required' })
     }
     try {
+        const user = req.user; // user is an array, and inside there is an object
+        console.log('req.user: ',user);
         // throwing error if columns are not mentioned
-        const db_query = `INSERT INTO userentry (amount, description, exptype)VALUES (?,?,?)`;
+        const db_query = `INSERT INTO userentry (amount, description, exptype, expense_id) VALUES (?,?,?,?)`;
 
         // if i put an await before pool.query, it suggest me to import promise version of pool.query
-        pool.query(db_query, [amount, description, category], (err, result) => {
+        //visit: https://github.com/sidorares/node-mysql2/blob/master/documentation/en/Promise-Wrapper.md
+        pool.query(db_query, [amount, description, category, user[0].id], (err, result) => {
             if(err){
                 console.log(err);
                 return res.json({ message: 'error inserting data'})
@@ -104,8 +113,9 @@ const addExpense = (req, res) => {
 }
 
 const getAllUserEntry = (req, res) => {
-    const db_query = `SELECT * FROM userentry`;
-    pool.execute(db_query, (err,result) => {
+    const id = req.user[0].id;
+    const db_query = `SELECT * FROM userentry WHERE expense_id = ?`;
+    pool.execute(db_query,[ id ], (err,result) => {
         if(err){
             console.log(err);
             return res.json({ message: 'error in reading database'});

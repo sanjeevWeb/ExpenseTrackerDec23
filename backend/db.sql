@@ -18,3 +18,14 @@ CREATE TABLE userentry (
 );
 
 -- ALTER userentry
+ALTER TABLE expenses
+ADD PRIMARY KEY (id);
+
+-- First, add the foreign key column to the userentry table
+ALTER TABLE userentry
+ADD COLUMN expense_id INT;
+
+-- Then, add the foreign key constraint
+ALTER TABLE userentry
+ADD CONSTRAINT fk_userentry_expenses
+FOREIGN KEY (expense_id) REFERENCES expenses(id);
