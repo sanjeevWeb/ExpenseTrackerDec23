@@ -98,3 +98,55 @@ premBtn.addEventListener('click', () => {
         })
         .catch(err => console.log(err))
 })
+
+
+// Check if the user is a premium user on page load
+// this code is fine for a single user but not for multiple user
+// document.addEventListener('DOMContentLoaded', () => {
+//     const isPremiumUser = localStorage.getItem('premiumUser');
+
+//     if (isPremiumUser === 'true') {
+//         premBtn.disabled = true;
+//         alert('You are a premium user');
+//     }
+// });
+
+
+// this can be optimised by using promise.all in getAllData function above
+function checkPremiumStatus () {
+    const token = localStorage.getItem('token');
+    axios.get('http://localhost:5000/user/getstatus', { headers: { 'Authorization': `${token}` } })
+    .then(result => {
+        console.log(result)
+        const isPremium = result.data.isPremium;
+        if(isPremium){
+            document.querySelector('#premBtn').classList.add('hideElement');
+            const btn = document.createElement('button');
+            btn.setAttribute('id', 'showLB');
+            btn.textContent = 'show leaderbord';
+            btn.addEventListener('click', () => showLeaderBoard())
+            document.querySelector('#msg').appendChild(btn)
+        }
+        else{
+            document.querySelector('#msg').classList.add('hideElement')
+        }
+    })
+    .catch(err => console.log(err))
+}
+
+checkPremiumStatus()
+
+function showLeaderBoard () {
+    axios.get('http://localhost:5000/premium/showlb')
+    .then(result => {
+        console.log(result)
+        const leaderbrd = document.querySelector('#leaderbrd')
+        leaderbrd.textContent = 'LeaderBoard';
+        result.data.userInfo.forEach(user => {
+            const li = document.createElement('li');
+            li.textContent = `Name: ${user.name}, total Expense: ${user.totalExpense}`;
+            leaderbrd.appendChild(li);
+        })
+    })
+    .catch(err => console.log(err))
+}

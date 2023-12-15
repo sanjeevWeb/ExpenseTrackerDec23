@@ -5,6 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <style>
+        .hideElement {
+            display: none;
+        }
+    </style>
 </head>
 
 <body>
@@ -25,10 +30,14 @@
         </form>
     </div>
     <div>
-        pay Rs. 20 and <button type="button" id="premBtn">Buy Premium</button>
+        <button type="button" id="premBtn">Buy Premium</button>
+        <p id="msg">you are a premium user now</p>
     </div>
     <div>
         <ul id="history"></ul>
+    </div>
+    <div>
+        <ul id="leaderbrd"></ul>
     </div>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.2/axios.min.js" integrity="sha512-b94Z6431JyXY14iSXwgzeZurHHRNkLt9d6bAHt7BZT38eqV+GyngIi/tVye4jBKPYQ2lBdRs0glww4fmpuLRwA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>

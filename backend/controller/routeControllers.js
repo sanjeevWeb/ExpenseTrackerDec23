@@ -148,67 +148,118 @@ const createOrder = (req, res) => {
             key_id: process.env.RAZORPAY_KEY_ID,
             key_secret: process.env.RAZORPAY_SECRET_KEY,
         });
-    
+
         const options = {
             amount: 2500,  // amount in the smallest currency unit
             currency: "INR",
         };
-    
+
         instance.orders.create(options, (err, order) => {
-            if(err) {
+            if (err) {
                 console.log(err);
                 return;
             }
-            console.log('order ',order);
+            console.log('order ', order);
             const db_query = `INSERT INTO orders (orderid,status,userid) VALUES (?,?,?)`;
 
-            pool.query(db_query,[order.id, 'PENDING', userId], (err,result) => {
-                if(err){
+            pool.query(db_query, [order.id, 'PENDING', userId], (err, result) => {
+                if (err) {
                     throw new Error(err);
                 }
-                return res.json({ order, key_id: instance.key_id});
+                return res.json({ order, key_id: instance.key_id });
             })
             // req.user.createOrder({orderid: order.id, status: 'PENDING'})
             // .then(() => {
             //     return res.json({ order, key_id:instance.key_id })
             // })
-        });    
-    } 
+        });
+    }
     catch (error) {
         console.log(error)
     }
 }
 
-const updataTransactionStatus = (req,res) => {
+const updataTransactionStatus = (req, res) => {
     try {
         const id = req.user[0].id;
         const { order_id, payment_id } = req.body;
         const db_query = `SELECT * FROM orders WHERE orderid = ?`;
         pool.query(db_query, [order_id], (err, result) => {
-            if(err){
+            if (err) {
                 console.log(err);
-                return res.json({message:'something broke'})
+                return res.json({ message: 'something broke' })
             }
             console.log('order table result: ', result);
             const db_query = `UPDATE orders SET paymentid = ?, status = ? WHERE orderid = ?`;
             pool.query(db_query, [payment_id, 'SUCCESSFULL', order_id], (err, result) => {
-                if(err){
+                if (err) {
                     throw new Error(err);
                 }
                 const db_query = `UPDATE expenses SET isPremium = 'true' where id = ?`;
-                pool.query(db_query, [id], (err,result) => {
-                    if(err){
+                pool.query(db_query, [id], (err, result) => {
+                    if (err) {
                         throw new Error(err);
                     }
-                    return res.json({ message: 'transaction successfull '})
+                    return res.json({ message: 'transaction successfull ' })
                 })
             })
         })
-    } 
+    }
     catch (error) {
-        
+
     }
 }
+
+const getPremiumStatus = (req, res) => {
+    const id = req.user[0].id;
+    const db_query = `SELECT * FROM expenses WHERE id = ?`;
+    pool.query(db_query, [id], (err, result) => {
+        if (err) {
+            return res.json({ error: 'error reading data' })
+        }
+        console.log('premium status: ', result);
+        const isPremium = result[0].isPremium;
+        return res.json({ isPremium });
+    })
+}
+
+const showLeaderBoard = (req, res) => {
+    const query = 'SELECT expense_id, SUM(amount) AS totalAmount FROM userentry GROUP BY expense_id';
+
+    pool.query(query, (err, results) => {
+        if (err) {
+            console.error('Error executing query:', err);
+            return;
+        }
+
+        console.log('Sum of amounts for each distinct id:');
+        console.table(results);
+        console.log(results);
+        const db_query = `SELECT * FROM expenses`;
+
+        pool.query(db_query, (err, userlist) => {
+            if(err){
+                throw new Error(err);
+            }
+            console.log(userlist);
+            console.table(userlist);
+            const userInfo = [];
+
+            results.forEach(ele => {
+                userlist.forEach(user => {
+                    if(user.id === ele.expense_id){
+                        userInfo.push({
+                            name: user.name,
+                            totalExpense: ele.totalAmount
+                        })
+                    }
+                })
+            })
+            return res.json({ userInfo });
+        })
+    });
+}
+
 module.exports = {
     RegisterFunc,
     LoginFunc,
@@ -216,5 +267,7 @@ module.exports = {
     getAllUserEntry,
     deleteDataById,
     createOrder,
-    updataTransactionStatus
+    updataTransactionStatus,
+    getPremiumStatus,
+    showLeaderBoard
 }
