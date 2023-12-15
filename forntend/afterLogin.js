@@ -18,45 +18,83 @@ expense_form.addEventListener('submit', (event) => {
     //sending token in headers
     const token = localStorage.getItem('token');
 
-    axios.post('http://localhost:5000/user/addexp', obj,{ headers: { 'Authorization': `${token}`}})
-    .then(result => {
-        console.log(result.data);
-        alert(result.data.message);
-        getAllData();
-    })
-    .catch(err => console.log(err))
+    axios.post('http://localhost:5000/user/addexp', obj, { headers: { 'Authorization': `${token}` } })
+        .then(result => {
+            console.log(result.data);
+            alert(result.data.message);
+            getAllData();
+        })
+        .catch(err => console.log(err))
 })
 
-function getAllData () {
+function getAllData() {
     const token = localStorage.getItem('token');
-    axios.get('http://localhost:5000/user/getdata',{ headers: { 'Authorization': `${token}`}})
-    .then(result => {
-        console.log(result.data);
-        history.innerHTML = ''
-        result.data.result.forEach(element => {
-            const li = document.createElement('li');
-            li.textContent = `id: ${element.id} ,Rs: ${element.amount},${element.description},${element.exptype}, userid: ${element.expense_id}`;
-            const btn = document.createElement('button');
-            btn.textContent = 'delete';
-            btn.addEventListener('click', () => delBtnHandler(`${element.id}`));
-            li.appendChild(btn);
-            history.appendChild(li);
-        });
-       
-    })
-    .catch(err => console.log(err))
+    axios.get('http://localhost:5000/user/getdata', { headers: { 'Authorization': `${token}` } })
+        .then(result => {
+            console.log(result.data);
+            history.innerHTML = ''
+            result.data.result.forEach(element => {
+                const li = document.createElement('li');
+                li.textContent = `id: ${element.id} ,Rs: ${element.amount},${element.description},${element.exptype}, userid: ${element.expense_id}`;
+                const btn = document.createElement('button');
+                btn.textContent = 'delete';
+                btn.addEventListener('click', () => delBtnHandler(`${element.id}`));
+                li.appendChild(btn);
+                history.appendChild(li);
+            });
+
+        })
+        .catch(err => console.log(err))
 }
 
 getAllData();
 
-function delBtnHandler(id){
-    console.log('btn clicked with id: ',id);
+function delBtnHandler(id) {
+    console.log('btn clicked with id: ', id);
     axios.delete(`http://localhost:5000/user/delete/${id}`)
-    .then(result => {
-        console.log(result);
-        alert(result.data.message)
-        getAllData();
-    })
-    .catch(err => console.log(err))
+        .then(result => {
+            console.log(result);
+            alert(result.data.message)
+            getAllData();
+        })
+        .catch(err => console.log(err))
 }
 
+
+// razorpay oprations
+const premBtn = document.querySelector('#premBtn');
+
+premBtn.addEventListener('click', () => {
+    const token = localStorage.getItem('token');
+    console.log(token);
+    axios.get('http://localhost:5000/user/createorder', { headers: { 'Authorization': `${token}` } })
+        .then(result => {
+            let options = {
+                "key": result.data.key_id,
+                "order_id": result.data.order.id, //for one time payment
+                "handler": (result) => {
+                    const token = localStorage.getItem('token');
+                    axios.post('http://localhost:5000/user/updatestatus', {
+                        order_id: options.order_id,
+                        payment_id: result.razorpay_payment_id,
+                    }, { headers: { 'Authorization': `${token}` } })
+                        .then(() => {
+                            premBtn.disabled = true;
+                            alert('you are a premium user now')
+                        })
+                        .catch(err => console.log(err));
+                }
+            }
+
+            var rzp1 = new Razorpay(options);
+            rzp1.open();
+            e.preventDefault();
+
+            rzp1.on('payment.failed', function (response) {
+                console.log(response)
+                alert(response.error.description);
+                alert(response.error.metadata.payment_id);
+            })
+        })
+        .catch(err => console.log(err))
+})

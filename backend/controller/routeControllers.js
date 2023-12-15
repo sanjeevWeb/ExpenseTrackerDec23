@@ -1,6 +1,7 @@
 const pool = require("../db/database");
 const bcrypt = require("bcryptjs")
 const jwt = require("jsonwebtoken")
+const Razorpay = require('razorpay')
 
 
 const RegisterFunc = async (req, res) => {
@@ -90,16 +91,16 @@ const addExpense = (req, res) => {
     }
     try {
         const user = req.user; // user is an array, and inside there is an object
-        console.log('req.user: ',user);
+        console.log('req.user: ', user);
         // throwing error if columns are not mentioned
         const db_query = `INSERT INTO userentry (amount, description, exptype, expense_id) VALUES (?,?,?,?)`;
 
         // if i put an await before pool.query, it suggest me to import promise version of pool.query
         //visit: https://github.com/sidorares/node-mysql2/blob/master/documentation/en/Promise-Wrapper.md
         pool.query(db_query, [amount, description, category, user[0].id], (err, result) => {
-            if(err){
+            if (err) {
                 console.log(err);
-                return res.json({ message: 'error inserting data'})
+                return res.json({ message: 'error inserting data' })
             }
             console.log(result);
             // console.log(result.insertId); id: result.insertId
@@ -115,33 +116,105 @@ const addExpense = (req, res) => {
 const getAllUserEntry = (req, res) => {
     const id = req.user[0].id;
     const db_query = `SELECT * FROM userentry WHERE expense_id = ?`;
-    pool.execute(db_query,[ id ], (err,result) => {
-        if(err){
+    pool.execute(db_query, [id], (err, result) => {
+        if (err) {
             console.log(err);
-            return res.json({ message: 'error in reading database'});
+            return res.json({ message: 'error in reading database' });
         }
         console.log(result);
         return res.json({ result });
     })
 }
 
-const deleteDataById = (req,res) => {
+const deleteDataById = (req, res) => {
     const id = req.params.id;
     const db_query = `DELETE FROM userentry WHERE id = ?`;
-    pool.query(db_query,[id], (err,result) => {
-        if(err){
+    pool.query(db_query, [id], (err, result) => {
+        if (err) {
             console.log(err);
-            return res.json({message: 'error deleteting this entry'})
+            return res.json({ message: 'error deleteting this entry' })
         }
         console.log(result);
-        return res.json({ message: `id: ${id} deleted`});
+        return res.json({ message: `id: ${id} deleted` });
     })
 }
 
+
+// razorpay operations
+const createOrder = (req, res) => {
+    try {
+        const userId = req.user[0].id;
+        const instance = new Razorpay({
+            key_id: process.env.RAZORPAY_KEY_ID,
+            key_secret: process.env.RAZORPAY_SECRET_KEY,
+        });
+    
+        const options = {
+            amount: 2500,  // amount in the smallest currency unit
+            currency: "INR",
+        };
+    
+        instance.orders.create(options, (err, order) => {
+            if(err) {
+                console.log(err);
+                return;
+            }
+            console.log('order ',order);
+            const db_query = `INSERT INTO orders (orderid,status,userid) VALUES (?,?,?)`;
+
+            pool.query(db_query,[order.id, 'PENDING', userId], (err,result) => {
+                if(err){
+                    throw new Error(err);
+                }
+                return res.json({ order, key_id: instance.key_id});
+            })
+            // req.user.createOrder({orderid: order.id, status: 'PENDING'})
+            // .then(() => {
+            //     return res.json({ order, key_id:instance.key_id })
+            // })
+        });    
+    } 
+    catch (error) {
+        console.log(error)
+    }
+}
+
+const updataTransactionStatus = (req,res) => {
+    try {
+        const id = req.user[0].id;
+        const { order_id, payment_id } = req.body;
+        const db_query = `SELECT * FROM orders WHERE orderid = ?`;
+        pool.query(db_query, [order_id], (err, result) => {
+            if(err){
+                console.log(err);
+                return res.json({message:'something broke'})
+            }
+            console.log('order table result: ', result);
+            const db_query = `UPDATE orders SET paymentid = ?, status = ? WHERE orderid = ?`;
+            pool.query(db_query, [payment_id, 'SUCCESSFULL', order_id], (err, result) => {
+                if(err){
+                    throw new Error(err);
+                }
+                const db_query = `UPDATE expenses SET isPremium = 'true' where id = ?`;
+                pool.query(db_query, [id], (err,result) => {
+                    if(err){
+                        throw new Error(err);
+                    }
+                    return res.json({ message: 'transaction successfull '})
+                })
+            })
+        })
+    } 
+    catch (error) {
+        
+    }
+}
 module.exports = {
     RegisterFunc,
     LoginFunc,
     addExpense,
     getAllUserEntry,
-    deleteDataById
+    deleteDataById,
+    createOrder,
+    updataTransactionStatus
 }

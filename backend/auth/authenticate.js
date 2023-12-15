@@ -4,6 +4,10 @@ const { json } = require('express');
 
 const isRequestValid = (req,res,next) => {
     const token = req.headers['authorization'];
+    // console.log(token)
+    if (!token) {
+        return res.json({ message: 'Token not provided' });
+    }
     const decode_id = jwt.verify(token, 'hfjsfjskksq');
     console.log(decode_id);
     if(decode_id){
