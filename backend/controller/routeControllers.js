@@ -223,42 +223,65 @@ const getPremiumStatus = (req, res) => {
     })
 }
 
+// const showLeaderBoard = (req, res) => {
+//     const query = 'SELECT expense_id, SUM(amount) AS totalAmount FROM userentry GROUP BY expense_id';
+
+//     pool.query(query, (err, results) => {
+//         if (err) {
+//             console.error('Error executing query:', err);
+//             return;
+//         }
+
+//         console.log('Sum of amounts for each distinct id:');
+//         console.table(results);
+//         console.log(results);
+//         const db_query = `SELECT * FROM expenses`;
+
+//         pool.query(db_query, (err, userlist) => {
+//             if(err){
+//                 throw new Error(err);
+//             }
+//             console.log(userlist);
+//             console.table(userlist);
+//             const userInfo = [];
+
+//             results.forEach(ele => {
+//                 userlist.forEach(user => {
+//                     if(user.id === ele.expense_id){
+//                         userInfo.push({
+//                             name: user.name,
+//                             totalExpense: ele.totalAmount
+//                         })
+//                     }
+//                 })
+//             })
+//             return res.json({ userInfo });
+//         })
+//     });
+// }
+
 const showLeaderBoard = (req, res) => {
-    const query = 'SELECT expense_id, SUM(amount) AS totalAmount FROM userentry GROUP BY expense_id';
+    const query = `
+        SELECT e.name, e.email, u.expense_id, SUM(u.amount) AS totalAmount
+        FROM expenses e
+        JOIN userentry u ON e.id = u.expense_id
+        GROUP BY e.id, u.expense_id;
+    `;
 
     pool.query(query, (err, results) => {
         if (err) {
             console.error('Error executing query:', err);
-            return;
+            return res.status(500).json({ error: 'Internal Server Error' });
         }
 
-        console.log('Sum of amounts for each distinct id:');
-        console.table(results);
-        console.log(results);
-        const db_query = `SELECT * FROM expenses`;
+        const userInfo = results.map(row => ({
+            name: row.name,
+            totalExpense: row.totalAmount
+        }));
 
-        pool.query(db_query, (err, userlist) => {
-            if(err){
-                throw new Error(err);
-            }
-            console.log(userlist);
-            console.table(userlist);
-            const userInfo = [];
-
-            results.forEach(ele => {
-                userlist.forEach(user => {
-                    if(user.id === ele.expense_id){
-                        userInfo.push({
-                            name: user.name,
-                            totalExpense: ele.totalAmount
-                        })
-                    }
-                })
-            })
-            return res.json({ userInfo });
-        })
+        return res.json({ userInfo });
     });
-}
+};
 
 module.exports = {
     RegisterFunc,

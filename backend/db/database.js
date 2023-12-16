@@ -3,6 +3,7 @@ const mysql = require('mysql2');
 const pool = mysql.createConnection({
     host: 'localhost',
     user: 'root',
+    // password: process.env.DATABASE_PASSWORD,
     password: 'root123',
     database: 'expencetrac'
 });
