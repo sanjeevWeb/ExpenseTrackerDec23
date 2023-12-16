@@ -260,29 +260,44 @@ const getPremiumStatus = (req, res) => {
 //     });
 // }
 
-const showLeaderBoard = (req, res) => {
-    const query = `
-        SELECT e.name, e.email, u.expense_id, SUM(u.amount) AS totalAmount
-        FROM expenses e
-        JOIN userentry u ON e.id = u.expense_id
-        GROUP BY e.id, u.expense_id;
-    `;
+// const showLeaderBoard = (req, res) => {
+//     const query = `
+//         SELECT e.name, e.email, u.expense_id, SUM(u.amount) AS totalAmount
+//         FROM expenses e
+//         JOIN userentry u ON e.id = u.expense_id
+//         GROUP BY e.id, u.expense_id;
+//     `;
 
-    pool.query(query, (err, results) => {
-        if (err) {
-            console.error('Error executing query:', err);
-            return res.status(500).json({ error: 'Internal Server Error' });
+//     pool.query(query, (err, results) => {
+//         if (err) {
+//             console.error('Error executing query:', err);
+//             return res.status(500).json({ error: 'Internal Server Error' });
+//         }
+
+//         const userInfo = results.map(row => ({
+//             name: row.name,
+//             totalExpense: row.totalAmount
+//         }));
+
+//         return res.json({ userInfo });
+//     });
+// };
+
+const showLeaderBoard = (req,res) => {
+    const db_query = `SELECT * FROM expenses`;
+    pool.query(db_query, (err, result) => {
+        if(err){
+            throw new Error(err)
         }
-
-        const userInfo = results.map(row => ({
-            name: row.name,
-            totalExpense: row.totalAmount
-        }));
+        console.log('expenses ', result);
+        const userInfo = result.map(ele => ({
+            name: ele.name,
+            totalExpense: ele.totalExpense,
+        }))
 
         return res.json({ userInfo });
-    });
-};
-
+    })
+}
 module.exports = {
     RegisterFunc,
     LoginFunc,

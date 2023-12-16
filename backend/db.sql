@@ -50,3 +50,22 @@ CREATE TABLE orders (
     CONSTRAINT fk_orders_expenses FOREIGN KEY (userid)
     REFERENCES expenses(id)
 );
+
+-- adding a new table to get total expense
+ALTER TABLE expenses
+ADD COLUMN totalExpense INT DEFAULT 0;
+
+
+DELIMITER //
+
+CREATE TRIGGER after_userentry_insert
+AFTER INSERT ON userentry
+FOR EACH ROW
+BEGIN
+    UPDATE expenses
+    SET totalExpense = totalExpense + NEW.amount
+    WHERE id = NEW.expense_id;
+END;
+//
+
+DELIMITER ;
