@@ -55,7 +55,7 @@ CREATE TABLE orders (
 ALTER TABLE expenses
 ADD COLUMN totalExpense INT DEFAULT 0;
 
-
+-- to add the amount in totalExpense column
 DELIMITER //
 
 CREATE TRIGGER after_userentry_insert
@@ -69,3 +69,36 @@ END;
 //
 
 DELIMITER ;
+
+-- update above DELIMITER on deletion of row of userentry table-- not working perhaps we alredy added
+-- DELIMITER //
+
+-- CREATE TRIGGER after_userentry_insert_update
+-- AFTER INSERT, UPDATE ON userentry
+-- FOR EACH ROW
+-- BEGIN
+--     IF NEW.expense_id IS NOT NULL THEN
+--         UPDATE expenses
+--         SET totalExpense = totalExpense + NEW.amount
+--         WHERE id = NEW.expense_id;
+--     END IF;
+-- END;
+-- //
+
+-- DELIMITER ;
+
+-- working fine to deduct the amount after deletion from userentry table
+DELIMITER //
+
+CREATE TRIGGER after_userentry_delete
+AFTER DELETE ON userentry
+FOR EACH ROW
+BEGIN
+    UPDATE expenses
+    SET totalExpense = totalExpense - OLD.amount
+    WHERE id = OLD.expense_id;
+END;
+//
+
+DELIMITER ;
+
