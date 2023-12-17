@@ -298,6 +298,29 @@ const showLeaderBoard = (req,res) => {
         return res.json({ userInfo });
     })
 }
+
+const obj = {};
+
+const forgetPasswordHandler = (req,res) => {
+    const { email } = req.body
+    if(!email){
+        return res.json({ message: 'enter a valid mail id'})
+    }
+    obj.email = email;
+    const db_query = `SELECT email FROM expenses`;
+    pool.query(db_query, (err, result) => {
+        if(err){
+            throw new Error(err)
+        }
+        console.log(result)
+        const found = result.find(ele => ele.email === email);
+        if(!found){
+            return res.json({message: 'user not found'})
+        }
+        return res.json({message: 'check your mail'})
+    })
+}
+
 module.exports = {
     RegisterFunc,
     LoginFunc,
@@ -307,5 +330,7 @@ module.exports = {
     createOrder,
     updataTransactionStatus,
     getPremiumStatus,
-    showLeaderBoard
+    showLeaderBoard,
+    forgetPasswordHandler,
+    obj
 }

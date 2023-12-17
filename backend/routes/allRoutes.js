@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const isRequestValid = require('../auth/authenticate');
 
-const { LoginFunc, RegisterFunc, addExpense, getAllUserEntry, deleteDataById, createOrder, updataTransactionStatus, getPremiumStatus, showLeaderBoard } = require("../controller/routeControllers");
+const { LoginFunc, RegisterFunc, addExpense, getAllUserEntry, deleteDataById, createOrder, updataTransactionStatus, getPremiumStatus, showLeaderBoard, forgetPasswordHandler } = require("../controller/routeControllers");
 
 
 router.post('/api/signup', RegisterFunc)
@@ -25,5 +25,8 @@ router.get('/user/getstatus', isRequestValid, getPremiumStatus)
 
 // premium user routes
 router.get('/premium/showlb', showLeaderBoard)
+
+//forgot password route
+router.post('/password/forgetpassword', forgetPasswordHandler)
 
 module.exports = router;
