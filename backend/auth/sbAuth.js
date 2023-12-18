@@ -1,7 +1,7 @@
+
+// this code can be used to integrate mailing service from sendinblue in any project
 const Sib = require('sib-api-v3-sdk') // return a constructor
 require('dotenv').config()
-const { obj } = require('../controller/routeControllers.js')
-console.log(obj.email);
 
 const client = Sib.ApiClient.instance
 const apiKey = client.authentications['api-key']
@@ -19,7 +19,7 @@ const receivers = [
         email: 'kumaranshudutt94@gmail.com',
     },
     {
-        email: obj.email,
+        email: 'kumarsanjeevdutta02@gmail.com',
     },
 ]
 

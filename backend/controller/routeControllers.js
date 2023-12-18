@@ -2,6 +2,8 @@ const pool = require("../db/database");
 const bcrypt = require("bcryptjs")
 const jwt = require("jsonwebtoken")
 const Razorpay = require('razorpay')
+const Sib = require('sib-api-v3-sdk') // return a constructor
+const { v4: uuidv4 } = require('uuid');
 
 
 const RegisterFunc = async (req, res) => {
@@ -58,7 +60,7 @@ const LoginFunc = (req, res) => {
             }
             console.log(result);
             if (result.length === 0) {
-                return res.json({ message: 'user not found' })
+                return res.json({ error: 'user not found' })
             }
             if (result[0].email === email) {
                 const isMatched = await bcrypt.compare(passKey, result[0].pass);
@@ -70,11 +72,11 @@ const LoginFunc = (req, res) => {
                     return res.json({ message: 'log in successfull', token })
                 }
                 else {
-                    return res.json({ message: 'user not authorized' })
+                    return res.json({ error: 'user not authorized' })
                 }
             }
             else {
-                return res.json({ message: 'User not found' })
+                return res.json({ error: 'User not found' })
             }
 
         })
@@ -283,10 +285,10 @@ const getPremiumStatus = (req, res) => {
 //     });
 // };
 
-const showLeaderBoard = (req,res) => {
+const showLeaderBoard = (req, res) => {
     const db_query = `SELECT * FROM expenses`;
     pool.query(db_query, (err, result) => {
-        if(err){
+        if (err) {
             throw new Error(err)
         }
         console.log('expenses ', result);
@@ -299,25 +301,124 @@ const showLeaderBoard = (req,res) => {
     })
 }
 
-const obj = {};
 
-const forgetPasswordHandler = (req,res) => {
+const forgetPasswordHandler = (req, res) => {
     const { email } = req.body
-    if(!email){
-        return res.json({ message: 'enter a valid mail id'})
+    if (!email) {
+        return res.json({ message: 'enter a valid mail id' })
     }
-    obj.email = email;
-    const db_query = `SELECT email FROM expenses`;
+    const db_query = `SELECT * FROM expenses`;
     pool.query(db_query, (err, result) => {
-        if(err){
+        if (err) {
             throw new Error(err)
         }
         console.log(result)
         const found = result.find(ele => ele.email === email);
-        if(!found){
+        if (!found) {
+            return res.json({ message: 'user not found' })
+        }
+        console.log('found ', found);
+        // saving request in fprequest table
+        const userid = found.id;
+        const id = uuidv4();
+        const query = `INSERT INTO fprequest (id, userid) VALUES (?,?)`;
+        pool.query(query, [id, userid], (err, result) => {
+            if (err){
+                throw new Error(err);
+            }
+            console.log('fprequest values inserted')
+
+            //sending mail
+            const client = Sib.ApiClient.instance
+            const apiKey = client.authentications['api-key']
+            apiKey.apiKey = process.env.SB_API_KEY
+
+            const tranEmailApi = new Sib.TransactionalEmailsApi()
+
+            const sender = {
+                email: 'kumarsanjeevdutta02@gmail.com',
+                name: 'Sanjeev',
+            }
+
+            const receivers = [
+                {
+                    email: 'kumarsanjeevdutta02@gmail.com',
+                },
+                {
+                    email: email,
+                },
+            ]
+
+            tranEmailApi
+                .sendTransacEmail({
+                    sender,
+                    to: receivers,
+                    subject: 'testing nodejs and sendinblue mail service',
+                    textContent: `
+                        Nmaste dost, you receiving this mail because i am testing nodejs app.
+                        `,
+                    htmlContent: `
+                        <h1>Hello to you</h1>
+                        <p>Nmaste dost, you receiving this mail because i am testing nodejs app password resetting</p>
+                        <a href="http://localhost:5000/password/resetpassword/${id}">click here</a>
+                `,
+                    params: {
+                        role: 'Backend and Full stack',
+                    },
+                })
+                .then(() => {
+                    return res.json({ message: 'check your mail' })
+                })
+                .catch(console.log)
+                
+        })
+
+    })
+}
+
+const resetPasswordHandler = (req,res) => {
+    const id = req.params.id;
+    const db_query = `SELECT * FROM fprequest where id = ?`;
+    pool.query(db_query, [id], (err, result) => {
+        if(err){
+            throw new Error(err)
+        }
+        console.log(result);
+        if(result.length == 0){
             return res.json({message: 'user not found'})
         }
-        return res.json({message: 'check your mail'})
+        res.send(`<form action="http://localhost:5000/password/newpassword/${id}" method="POST">
+                        <input type="text" name="newPassword" placeholder="enter new password">
+                        <input type="submit"></input>
+                    </form>`)
+    })
+}
+
+const setNewPassword = (req,res) => {
+    const newPassword = req.body.newPassword;
+    console.log('new password: ', newPassword);
+    const id = req.params.id;
+    const db_query = `SELECT * FROM fprequest WHERE id = ?`;
+
+    pool.query(db_query, [id], async (err,result) => {
+        if(err){
+            throw new Error(err)
+        }
+        console.log('new pass result: ', result);
+        const userid = result[0].userid;
+
+        //hashing password
+        const salt = await bcrypt.genSalt(10);
+        const hashedPass = await bcrypt.hash(newPassword, salt);
+
+        const query = `UPDATE expenses SET pass = ? WHERE id = ?`;
+        pool.query(query, [hashedPass,userid], (err, result) => {
+            if(err){
+                throw new Error(err);
+            }
+            console.log(result);
+            return res.send(`<p>please login your account</p>`)
+        })
     })
 }
 
@@ -332,5 +433,6 @@ module.exports = {
     getPremiumStatus,
     showLeaderBoard,
     forgetPasswordHandler,
-    obj
+    resetPasswordHandler,
+    setNewPassword
 }

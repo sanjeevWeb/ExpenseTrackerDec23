@@ -102,3 +102,17 @@ END;
 
 DELIMITER ;
 
+
+-- creating table for forget password requests
+
+CREATE TABLE fprequest (
+    id INT UNIQUE PRIMARY KEY,
+    userid INT,
+    isactive VARCHAR(255) DEFAULT true,
+    CONSTRAINT fk_fprequest_expenses FOREIGN KEY (userid)
+    REFERENCES expenses(id)
+);
+
+-- changeing datatype of id column
+ALTER TABLE fprequest
+MODIFY COLUMN id VARCHAR(255);

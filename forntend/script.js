@@ -58,6 +58,10 @@ loginForm.addEventListener('submit', (e) => {
     axios.post('http://localhost:5000/api/login', { email, passKey})
     .then(result => {
         // console.log(result);
+        if(result.data.error){
+            alert(result.data.error);
+            return;
+        }
         alert(result.data.message);
         const token = result.data.token;
         localStorage.setItem('token', token);
@@ -65,4 +69,11 @@ loginForm.addEventListener('submit', (e) => {
     })
     .catch(err => console.log(err))
 
+})
+
+
+//forgot password
+const fpBtn = document.querySelector('#fpBtn');
+fpBtn.addEventListener('click', () => {
+    window.location.href = 'fp.html'
 })

@@ -151,8 +151,3 @@ function showLeaderBoard () {
     .catch(err => console.log(err))
 }
 
-// forgot password
-const fpBtn = document.querySelector('#fpBtn');
-fpBtn.addEventListener('click', () => {
-    window.location.href = 'fp.html'
-})
