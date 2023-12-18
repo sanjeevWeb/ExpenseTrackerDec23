@@ -113,41 +113,70 @@ premBtn.addEventListener('click', () => {
 
 
 // this can be optimised by using promise.all in getAllData function above
-function checkPremiumStatus () {
+function checkPremiumStatus() {
     const token = localStorage.getItem('token');
     axios.get('http://localhost:5000/user/getstatus', { headers: { 'Authorization': `${token}` } })
-    .then(result => {
-        console.log(result)
-        const isPremium = result.data.isPremium;
-        if(isPremium){
-            document.querySelector('#premBtn').classList.add('hideElement');
-            const btn = document.createElement('button');
-            btn.setAttribute('id', 'showLB');
-            btn.textContent = 'show leaderbord';
-            btn.addEventListener('click', () => showLeaderBoard())
-            document.querySelector('#msg').appendChild(btn)
-        }
-        else{
-            document.querySelector('#msg').classList.add('hideElement')
-        }
-    })
-    .catch(err => console.log(err))
+        .then(result => {
+            console.log(result)
+            const isPremium = result.data.isPremium;
+            if (isPremium) {
+                document.querySelector('#premBtn').classList.add('hideElement');
+                const btn = document.createElement('button');
+                btn.setAttribute('id', 'showLB');
+                btn.textContent = 'show leaderbord';
+                btn.addEventListener('click', () => showLeaderBoard())
+                document.querySelector('#msg').appendChild(btn);
+            }
+            else {
+                document.querySelector('#msg').classList.add('hideElement')
+            }
+        })
+        .catch(err => console.log(err))
 }
 
 checkPremiumStatus()
 
-function showLeaderBoard () {
+function showLeaderBoard() {
     axios.get('http://localhost:5000/premium/showlb')
-    .then(result => {
-        console.log(result)
-        const leaderbrd = document.querySelector('#leaderbrd')
-        leaderbrd.textContent = 'LeaderBoard';
-        result.data.userInfo.forEach(user => {
-            const li = document.createElement('li');
-            li.textContent = `Name: ${user.name}, total Expense: ${user.totalExpense}`;
-            leaderbrd.appendChild(li);
+        .then(result => {
+            console.log(result)
+            const leaderbrd = document.querySelector('#leaderbrd')
+            leaderbrd.textContent = 'LeaderBoard';
+            result.data.userInfo.forEach(user => {
+                const li = document.createElement('li');
+                li.textContent = `Name: ${user.name}, total Expense: ${user.totalExpense}`;
+                leaderbrd.appendChild(li);
+            })
         })
-    })
-    .catch(err => console.log(err))
+        .catch(err => console.log(err))
 }
 
+
+//function to download file
+function download() {
+    const token = localStorage.getItem('token');
+    axios.get('http://localhost:5000/premium/download', { headers: { "Authorization": token } })
+        .then((response) => {
+            console.log(response.data)
+            var a = document.createElement("a");
+            // a.href = window.location.origin + response.data.fileUrl;
+            a.href = response.data.fileUrl;
+            a.download = 'myexpense.csv';
+            a.click();
+            // if(response.status === 201){
+            //     //the bcakend is essentially sending a download link
+            //     //  which if we open in browser, the file would download
+            //     var a = document.createElement("a");
+            //     a.href = response.data.fileUrl;
+            //     a.download = 'myexpense.csv';
+            //     a.click();
+            // }
+            //  else {
+            //     throw new Error(response.data.message)
+            // }
+
+        })
+        .catch((err) => {
+            console.log(err)
+        });
+}

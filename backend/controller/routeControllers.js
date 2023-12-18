@@ -4,7 +4,8 @@ const jwt = require("jsonwebtoken")
 const Razorpay = require('razorpay')
 const Sib = require('sib-api-v3-sdk') // return a constructor
 const { v4: uuidv4 } = require('uuid');
-
+const createCsvWriter = require('csv-writer').createObjectCsvWriter;
+const fs = require('fs')
 
 const RegisterFunc = async (req, res) => {
     const { username, email, pass } = req.body;
@@ -323,7 +324,7 @@ const forgetPasswordHandler = (req, res) => {
         const id = uuidv4();
         const query = `INSERT INTO fprequest (id, userid) VALUES (?,?)`;
         pool.query(query, [id, userid], (err, result) => {
-            if (err){
+            if (err) {
                 throw new Error(err);
             }
             console.log('fprequest values inserted')
@@ -370,22 +371,22 @@ const forgetPasswordHandler = (req, res) => {
                     return res.json({ message: 'check your mail' })
                 })
                 .catch(console.log)
-                
+
         })
 
     })
 }
 
-const resetPasswordHandler = (req,res) => {
+const resetPasswordHandler = (req, res) => {
     const id = req.params.id;
     const db_query = `SELECT * FROM fprequest where id = ?`;
     pool.query(db_query, [id], (err, result) => {
-        if(err){
+        if (err) {
             throw new Error(err)
         }
         console.log(result);
-        if(result.length == 0){
-            return res.json({message: 'user not found'})
+        if (result.length == 0) {
+            return res.json({ message: 'user not found' })
         }
         res.send(`<form action="http://localhost:5000/password/newpassword/${id}" method="POST">
                         <input type="text" name="newPassword" placeholder="enter new password">
@@ -394,14 +395,14 @@ const resetPasswordHandler = (req,res) => {
     })
 }
 
-const setNewPassword = (req,res) => {
+const setNewPassword = (req, res) => {
     const newPassword = req.body.newPassword;
     console.log('new password: ', newPassword);
     const id = req.params.id;
     const db_query = `SELECT * FROM fprequest WHERE id = ?`;
 
-    pool.query(db_query, [id], async (err,result) => {
-        if(err){
+    pool.query(db_query, [id], async (err, result) => {
+        if (err) {
             throw new Error(err)
         }
         console.log('new pass result: ', result);
@@ -412,14 +413,77 @@ const setNewPassword = (req,res) => {
         const hashedPass = await bcrypt.hash(newPassword, salt);
 
         const query = `UPDATE expenses SET pass = ? WHERE id = ?`;
-        pool.query(query, [hashedPass,userid], (err, result) => {
-            if(err){
+        pool.query(query, [hashedPass, userid], (err, result) => {
+            if (err) {
                 throw new Error(err);
             }
             console.log(result);
             return res.send(`<p>please login your account</p>`)
         })
     })
+}
+
+const sendDownloadLink = (req, res) => {
+    try {
+        // console.log('i am senddlink function')
+        // console.log(req.user)
+        // console.log(req.user[0].isPremium)
+        // console.log(typeof(req.user[0].isPremium))
+        if (req.user[0].isPremium === 'true') {
+            const csvWriter = createCsvWriter({
+                path: 'myexpense.csv',
+                header: [
+                    { id: 'amount', title: 'AMOUNT' },
+                    { id: 'desc', title: 'DESCRIPTION' }
+                ]
+            });
+            console.log('user is a premium user')
+            const expense_id = req.user[0].id;
+            const db_query = `SELECT * FROM userentry WHERE expense_id = ?`;
+            pool.query(db_query, [expense_id], (err, result) => {
+                if(err){
+                    throw new Error(err)
+                }
+                console.log('userentry: ', result);
+                const records = [];
+                for(let i=0;i<result.length;i++){
+                    records.push({
+                        amount: result[i].amount,
+                        desc: result[i].description
+                    })
+                }
+                // write data
+                csvWriter.writeRecords(records)
+                .then(() => {
+                    // Send the CSV file as a response
+                    console.log('done...')
+                    
+                    res.download('./myexpense.csv', 'myexpense.csv', (err) => {
+                        if (err) {
+                            console.error('Error sending CSV file:', err);
+                            res.status(500).json({ message: 'Internal Server Error' });
+                        } 
+                        else {
+                            // Deleting the CSV file after sending
+                            // fs.unlinkSync('myexpense.csv');
+                        }
+                    });
+                })
+                .catch((err) => {
+                    console.error('Error writing CSV records:', err);
+                    res.status(500).json({ message: 'Internal Server Error' });
+                });
+            })
+
+        }
+        else {
+            res.json({ error: 'user not authorized ' })
+        }
+
+    }
+    catch (error) {
+
+    }
 }
 
 module.exports = {
@@ -434,5 +498,6 @@ module.exports = {
     showLeaderBoard,
     forgetPasswordHandler,
     resetPasswordHandler,
-    setNewPassword
+    setNewPassword,
+    sendDownloadLink
 }
