@@ -126,6 +126,20 @@ function checkPremiumStatus () {
             btn.textContent = 'show leaderbord';
             btn.addEventListener('click', () => showLeaderBoard())
             document.querySelector('#msg').appendChild(btn)
+            let expHtml = `<div>Daily
+                                <div>
+                                dialy_total<span>100</span>
+                                </div>
+                                </div><div>Monthly
+                                <div>
+                                Monthly_total<span>100</span>
+                                </div>
+                                </div><div>Yearly
+                                <div>
+                                Yearly_total<span>100</span>
+                                </div>
+                                </div>`;
+                    document.querySelector('#allexp').innerHTML += expHtml;
         }
         else{
             document.querySelector('#msg').classList.add('hideElement')
