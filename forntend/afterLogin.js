@@ -116,6 +116,7 @@ premBtn.addEventListener('click', () => {
 function checkPremiumStatus() {
     const token = localStorage.getItem('token');
     axios.get('http://localhost:5000/user/getstatus', { headers: { 'Authorization': `${token}` } })
+<<<<<<< HEAD
         .then(result => {
             console.log(result)
             const isPremium = result.data.isPremium;
@@ -132,6 +133,38 @@ function checkPremiumStatus() {
             }
         })
         .catch(err => console.log(err))
+=======
+    .then(result => {
+        console.log(result)
+        const isPremium = result.data.isPremium;
+        if(isPremium){
+            document.querySelector('#premBtn').classList.add('hideElement');
+            const btn = document.createElement('button');
+            btn.setAttribute('id', 'showLB');
+            btn.textContent = 'show leaderbord';
+            btn.addEventListener('click', () => showLeaderBoard())
+            document.querySelector('#msg').appendChild(btn)
+            let expHtml = `<div>Daily
+                                <div>
+                                dialy_total<span>100</span>
+                                </div>
+                                </div><div>Monthly
+                                <div>
+                                Monthly_total<span>100</span>
+                                </div>
+                                </div><div>Yearly
+                                <div>
+                                Yearly_total<span>100</span>
+                                </div>
+                                </div>`;
+                    document.querySelector('#allexp').innerHTML += expHtml;
+        }
+        else{
+            document.querySelector('#msg').classList.add('hideElement')
+        }
+    })
+    .catch(err => console.log(err))
+>>>>>>> 8eba0c3f1baa1e648964ae2d159102889c8b8480
 }
 
 checkPremiumStatus()
