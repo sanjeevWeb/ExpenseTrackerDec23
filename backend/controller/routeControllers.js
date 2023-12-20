@@ -457,7 +457,7 @@ const sendDownloadLink = (req, res) => {
                 .then(() => {
                     // Send the CSV file as a response
                     console.log('done...')
-                    
+                    res.json({ fileUrl: `file:///D:/sharpener_web_dev/sharpener_projects/Backend_dev_start/ExpenceApp_11dec23/expenceApp_11dec23/backend/myexpense.csv`})
                     res.download('./myexpense.csv', 'myexpense.csv', (err) => {
                         if (err) {
                             console.error('Error sending CSV file:', err);
