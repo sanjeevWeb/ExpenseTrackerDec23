@@ -457,15 +457,16 @@ const sendDownloadLink = (req, res) => {
                 .then(() => {
                     // Send the CSV file as a response
                     console.log('done...')
-                    
-                    res.download('./myexpense.csv', 'myexpense.csv', (err) => {
+                    res.json({ fileUrl: `file:///D:/sharpener_web_dev/sharpener_projects/Backend_dev_start/ExpenceApp_11dec23/expenceApp_11dec23/backend/myexpense.csv`})
+                    // const path = `file:///D:/sharpener_web_dev/sharpener_projects/Backend_dev_start/ExpenceApp_11dec23/expenceApp_11dec23/backend/myexpense.csv`
+                    res.download( './myexpense.csv', 'myexpense.csv', (err) => {
                         if (err) {
                             console.error('Error sending CSV file:', err);
                             res.status(500).json({ message: 'Internal Server Error' });
                         } 
                         else {
                             // Deleting the CSV file after sending
-                            // fs.unlinkSync('myexpense.csv');
+                            fs.unlinkSync('myexpense.csv');
                         }
                     });
                 })
@@ -486,6 +487,21 @@ const sendDownloadLink = (req, res) => {
     }
 }
 
+const setPagination = (req,res) => {
+    const id = req.user[0].id;
+    const page = req.params.page
+    console.log('page', page)
+    const off_set = (page-1) * 2; // if we want to limit it to 2 values per page
+    const db_query = `SELECT * FROM userentry WHERE expense_id = ? LIMIT 2 offset ?`;
+    pool.query(db_query, [id,off_set], (err,result) => {
+        if(err){
+            throw new Error(err)
+        }
+        console.log(result);
+        res.json({result})
+    })
+}
+
 module.exports = {
     RegisterFunc,
     LoginFunc,
@@ -499,5 +515,6 @@ module.exports = {
     forgetPasswordHandler,
     resetPasswordHandler,
     setNewPassword,
-    sendDownloadLink
+    sendDownloadLink,
+    setPagination
 }

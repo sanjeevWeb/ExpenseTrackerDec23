@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const isRequestValid = require('../auth/authenticate');
 
-const { LoginFunc, RegisterFunc, addExpense, getAllUserEntry, deleteDataById, createOrder, updataTransactionStatus, getPremiumStatus, showLeaderBoard, forgetPasswordHandler, resetPasswordHandler, setNewPassword, sendDownloadLink } = require("../controller/routeControllers");
+const { LoginFunc, RegisterFunc, addExpense, getAllUserEntry, deleteDataById, createOrder, updataTransactionStatus, getPremiumStatus, showLeaderBoard, forgetPasswordHandler, resetPasswordHandler, setNewPassword, sendDownloadLink, setPagination } = require("../controller/routeControllers");
 
 
 router.post('/api/signup', RegisterFunc)
@@ -15,6 +15,8 @@ router.post('/user/addexp',isRequestValid, addExpense)
 router.get('/user/getdata',isRequestValid, getAllUserEntry)
 
 router.delete('/user/delete/:id', deleteDataById)
+
+router.get('/user/pagination/:page', isRequestValid, setPagination )
 
 // razorpay  operations
 router.get('/user/createorder', isRequestValid, createOrder)

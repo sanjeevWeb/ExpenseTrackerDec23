@@ -22,11 +22,12 @@ expense_form.addEventListener('submit', (event) => {
         .then(result => {
             console.log(result.data);
             alert(result.data.message);
-            getAllData();
+            // getAllData();
         })
         .catch(err => console.log(err))
 })
 
+//not called immidietly after page load because we using pagination now
 function getAllData() {
     const token = localStorage.getItem('token');
     axios.get('http://localhost:5000/user/getdata', { headers: { 'Authorization': `${token}` } })
@@ -47,7 +48,7 @@ function getAllData() {
         .catch(err => console.log(err))
 }
 
-getAllData();
+// getAllData();
 
 function delBtnHandler(id) {
     console.log('btn clicked with id: ', id);
@@ -116,7 +117,6 @@ premBtn.addEventListener('click', () => {
 function checkPremiumStatus() {
     const token = localStorage.getItem('token');
     axios.get('http://localhost:5000/user/getstatus', { headers: { 'Authorization': `${token}` } })
-<<<<<<< HEAD
         .then(result => {
             console.log(result)
             const isPremium = result.data.isPremium;
@@ -133,38 +133,6 @@ function checkPremiumStatus() {
             }
         })
         .catch(err => console.log(err))
-=======
-    .then(result => {
-        console.log(result)
-        const isPremium = result.data.isPremium;
-        if(isPremium){
-            document.querySelector('#premBtn').classList.add('hideElement');
-            const btn = document.createElement('button');
-            btn.setAttribute('id', 'showLB');
-            btn.textContent = 'show leaderbord';
-            btn.addEventListener('click', () => showLeaderBoard())
-            document.querySelector('#msg').appendChild(btn)
-            let expHtml = `<div>Daily
-                                <div>
-                                dialy_total<span>100</span>
-                                </div>
-                                </div><div>Monthly
-                                <div>
-                                Monthly_total<span>100</span>
-                                </div>
-                                </div><div>Yearly
-                                <div>
-                                Yearly_total<span>100</span>
-                                </div>
-                                </div>`;
-                    document.querySelector('#allexp').innerHTML += expHtml;
-        }
-        else{
-            document.querySelector('#msg').classList.add('hideElement')
-        }
-    })
-    .catch(err => console.log(err))
->>>>>>> 8eba0c3f1baa1e648964ae2d159102889c8b8480
 }
 
 checkPremiumStatus()
@@ -212,4 +180,26 @@ function download() {
         .catch((err) => {
             console.log(err)
         });
+}
+
+
+// pagination function
+
+function setPagination (page) {
+    const token = localStorage.getItem('token')
+    axios.get(`http://localhost:5000/user/pagination/${page}`, {headers: { "Authorization": token}})
+    .then(result => {
+        console.log(result);
+        history.innerHTML = ''
+        result.data.result.forEach(element => {
+            const li = document.createElement('li');
+            li.textContent = `id: ${element.id} ,Rs: ${element.amount},${element.description},${element.exptype}, userid: ${element.expense_id}`;
+            const btn = document.createElement('button');
+            btn.textContent = 'delete';
+            btn.addEventListener('click', () => delBtnHandler(`${element.id}`));
+            li.appendChild(btn);
+            history.appendChild(li);
+        });
+    })
+    .catch(err => console.log(err))
 }
