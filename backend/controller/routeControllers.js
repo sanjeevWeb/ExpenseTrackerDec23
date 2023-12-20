@@ -458,8 +458,12 @@ const sendDownloadLink = (req, res) => {
                     // Send the CSV file as a response
                     console.log('done...')
                     res.json({ fileUrl: `file:///D:/sharpener_web_dev/sharpener_projects/Backend_dev_start/ExpenceApp_11dec23/expenceApp_11dec23/backend/myexpense.csv`})
+<<<<<<< HEAD
                     // const path = `file:///D:/sharpener_web_dev/sharpener_projects/Backend_dev_start/ExpenceApp_11dec23/expenceApp_11dec23/backend/myexpense.csv`
                     res.download( './myexpense.csv', 'myexpense.csv', (err) => {
+=======
+                    res.download('./myexpense.csv', 'myexpense.csv', (err) => {
+>>>>>>> b6acf31b142028b633c073d31f187c136ddb1d40
                         if (err) {
                             console.error('Error sending CSV file:', err);
                             res.status(500).json({ message: 'Internal Server Error' });
@@ -515,6 +519,11 @@ module.exports = {
     forgetPasswordHandler,
     resetPasswordHandler,
     setNewPassword,
+<<<<<<< HEAD
     sendDownloadLink,
     setPagination
 }
+=======
+    sendDownloadLink
+}
+>>>>>>> b6acf31b142028b633c073d31f187c136ddb1d40
