@@ -187,7 +187,9 @@ function download() {
 
 function setPagination (page) {
     const token = localStorage.getItem('token')
-    axios.get(`http://localhost:5000/user/pagination/${page}`, {headers: { "Authorization": token}})
+    const limit = localStorage.getItem('rows')
+
+    axios.get(`http://localhost:5000/user/pagination/${page}/${limit}`, {headers: { "Authorization": token}})
     .then(result => {
         console.log(result);
         history.innerHTML = ''
@@ -203,3 +205,12 @@ function setPagination (page) {
     })
     .catch(err => console.log(err))
 }
+
+const rowsBtn = document.querySelector('#rowsBtn');
+const rows = document.querySelector('#rows')
+
+rowsBtn.addEventListener('click', () => {
+    const row = rows.value;
+    console.log('rows', row)
+    localStorage.setItem('rows', row);
+})

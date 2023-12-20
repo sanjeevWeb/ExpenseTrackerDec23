@@ -16,7 +16,7 @@ router.get('/user/getdata',isRequestValid, getAllUserEntry)
 
 router.delete('/user/delete/:id', deleteDataById)
 
-router.get('/user/pagination/:page', isRequestValid, setPagination )
+router.get('/user/pagination/:page/:limit', isRequestValid, setPagination )
 
 // razorpay  operations
 router.get('/user/createorder', isRequestValid, createOrder)

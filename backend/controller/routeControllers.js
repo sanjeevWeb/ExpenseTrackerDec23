@@ -458,12 +458,8 @@ const sendDownloadLink = (req, res) => {
                     // Send the CSV file as a response
                     console.log('done...')
                     res.json({ fileUrl: `file:///D:/sharpener_web_dev/sharpener_projects/Backend_dev_start/ExpenceApp_11dec23/expenceApp_11dec23/backend/myexpense.csv`})
-<<<<<<< HEAD
                     // const path = `file:///D:/sharpener_web_dev/sharpener_projects/Backend_dev_start/ExpenceApp_11dec23/expenceApp_11dec23/backend/myexpense.csv`
                     res.download( './myexpense.csv', 'myexpense.csv', (err) => {
-=======
-                    res.download('./myexpense.csv', 'myexpense.csv', (err) => {
->>>>>>> b6acf31b142028b633c073d31f187c136ddb1d40
                         if (err) {
                             console.error('Error sending CSV file:', err);
                             res.status(500).json({ message: 'Internal Server Error' });
@@ -493,11 +489,11 @@ const sendDownloadLink = (req, res) => {
 
 const setPagination = (req,res) => {
     const id = req.user[0].id;
-    const page = req.params.page
-    console.log('page', page)
-    const off_set = (page-1) * 2; // if we want to limit it to 2 values per page
-    const db_query = `SELECT * FROM userentry WHERE expense_id = ? LIMIT 2 offset ?`;
-    pool.query(db_query, [id,off_set], (err,result) => {
+    const pageNum = req.params.page
+    const page_limit = req.params.limit;
+    const off_set = (pageNum-1) * (+page_limit); // if we want to limit it to 2 values per page
+    const db_query = `SELECT * FROM userentry WHERE expense_id = ? LIMIT ? offset ?`;
+    pool.query(db_query, [id,(+page_limit),off_set], (err,result) => {
         if(err){
             throw new Error(err)
         }
@@ -519,11 +515,6 @@ module.exports = {
     forgetPasswordHandler,
     resetPasswordHandler,
     setNewPassword,
-<<<<<<< HEAD
     sendDownloadLink,
     setPagination
 }
-=======
-    sendDownloadLink
-}
->>>>>>> b6acf31b142028b633c073d31f187c136ddb1d40
