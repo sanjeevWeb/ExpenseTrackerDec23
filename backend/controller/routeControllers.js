@@ -337,13 +337,13 @@ const forgetPasswordHandler = (req, res) => {
             const tranEmailApi = new Sib.TransactionalEmailsApi()
 
             const sender = {
-                email: 'kumarsanjeevdutta02@gmail.com',
+                email: process.env.email,
                 name: 'Sanjeev',
             }
 
             const receivers = [
                 {
-                    email: 'kumarsanjeevdutta02@gmail.com',
+                    email: process.env.email,
                 },
                 {
                     email: email,

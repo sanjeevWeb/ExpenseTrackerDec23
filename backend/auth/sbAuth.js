@@ -10,16 +10,16 @@ apiKey.apiKey = process.env.SB_API_KEY
 const tranEmailApi = new Sib.TransactionalEmailsApi()
 
 const sender = {
-    email: 'kumarsanjeevdutta02@gmail.com',
+    email: process.env.email,
     name: 'Sanjeev',
 }
 
 const receivers = [
     {
-        email: 'kumaranshudutt94@gmail.com',
+        email: process.env.email,
     },
     {
-        email: 'kumarsanjeevdutta02@gmail.com',
+        email: process.env.email,
     },
 ]
 
@@ -34,7 +34,7 @@ tranEmailApi
         htmlContent: `
         <h1>Hello to you</h1>
         <p>Nmaste dost, you receiving this mail because i am testing nodejs app password resetting</p>
-        <a href="https://github.com/sanjeevWeb">Visit</a>
+        <a href="https://github.com">Visit</a>
                 `,
         params: {
             role: 'Backend and Full stack',
