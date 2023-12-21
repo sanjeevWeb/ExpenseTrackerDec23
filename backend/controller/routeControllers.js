@@ -462,7 +462,7 @@ const sendDownloadLink = (req, res) => {
                     res.download( './myexpense.csv', 'myexpense.csv', (err) => {
                         if (err) {
                             console.error('Error sending CSV file:', err);
-                            res.status(500).json({ message: 'Internal Server Error' });
+                            // res.status(500).json({ message: 'Internal Server Error' });
                         } 
                         else {
                             // Deleting the CSV file after sending

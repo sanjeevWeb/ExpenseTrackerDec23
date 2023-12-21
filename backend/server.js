@@ -4,12 +4,15 @@ const cors = require('cors');
 const router = require('./routes/allRoutes.js')
 require('dotenv').config()
 
+const helmet = require('helmet')
+const morgan = require('morgan')
 
 //middlewares
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }))
-
+app.use(helmet())
+morgan('combined')
 
 app.use('/', router);
 
